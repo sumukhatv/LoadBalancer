@@ -70,18 +70,21 @@ int server::do_this(int sock_fd) {
 	char buff[BUFFER_SZ];
 	
 	memset(buff, 0, sizeof (buff));
-	flag = read(sock_fd, buff, sizeof (buff));
-	if (flag < 0) {
-		perror("Read failed");
-		return FAILURE;
+	while (read(sock_fd, buff, sizeof (buff)) > 0) {
+		printf("Here is the message\n");
+		printf("%s\n", buff);
+		memset(buff, 0, sizeof (buff));
+		strcpy(buff, "Thank you!\n");
+		flag = write(sock_fd, buff, sizeof (buff));
+		if (flag < 0) {
+			perror("Write failed");
+			return FAILURE;
+		}
+		memset(buff, 0, sizeof (buff));
 	}
-	printf("Here is the message\n");
-	printf("%s\n", buff);
-	strcpy(buff, "Thank you!");
-	flag = write(sock_fd, buff, sizeof (buff));
-	if (flag < 0) {
-		perror("Write failed");
-		return FAILURE;
-	}	
+	if (sock_fd == 0) {	
+		printf("Client disconnected\n");
+		fflush(stdout);
+	}
 	return SUCCESS;
 }
